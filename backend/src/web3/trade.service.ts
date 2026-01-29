@@ -5,6 +5,7 @@ export type TradeDTO = {
   marketId: string;
   outcomeIndex: number;
   amount: number;
+  walletAddress?: string;
 };
 
 export const TradeService = {

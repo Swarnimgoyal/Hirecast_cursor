@@ -25,6 +25,8 @@ export type Trade = {
   outcomeIndex: number;
   amount: number;
   timestamp: number;
+  // Wallet address placing the trade (if provided by frontend).
+  walletAddress?: string;
 };
 
 type CreateMarketInput = {
@@ -37,6 +39,8 @@ type TradeInput = {
   marketId: string;
   outcomeIndex: number;
   amount: number;
+  // Optional wallet address so we can associate trades with users.
+  walletAddress?: string;
 };
 
 type ResolveMarketInput = {
@@ -127,6 +131,7 @@ export class PNPAdapter {
       outcomeIndex: input.outcomeIndex,
       amount: input.amount,
       timestamp: Date.now(),
+      walletAddress: input.walletAddress,
     };
     this.trades.push(trade);
 
