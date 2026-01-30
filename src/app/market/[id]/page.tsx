@@ -4,28 +4,33 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { ProbabilityChart } from "@/components/Charts/ProbabilityChart";
 import { TradeModal } from "@/components/TradeModal";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { useWallet } from "@/components/WalletContextProvider";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Wallet } from "lucide-react";
 
 export default function MarketPage() {
   const { id } = useParams();
-  const { connected } = useWallet();
+  const { connected, connect } = useWallet();
   const [market, setMarket] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    // In a real app we would have a specific endpoint /api/markets/[id], 
-    // but here we filter from all markets for simplicity of the MVP API structure.
-    fetch("/api/markets")
-      .then((res) => res.json())
-      .then((data) => {
-        const found = data.find((m: any) => m.id === Number(id));
-        setMarket(found);
-        setLoading(false);
-      });
+    // Poll for updates (Price, Volume, etc.)
+    const fetchMarket = () => {
+        fetch("/api/markets") // In prod: /api/markets/[id]
+          .then((res) => res.json())
+          .then((data) => {
+            const found = data.find((m: any) => m.id === Number(id));
+            setMarket(found);
+            setLoading(false);
+          });
+    };
+
+    fetchMarket();
+    const interval = setInterval(fetchMarket, 5000);
+
+    return () => clearInterval(interval);
   }, [id]);
 
   if (loading) return <div className="text-center py-20">Loading market details...</div>;
@@ -53,33 +58,39 @@ export default function MarketPage() {
                     <div className="p-6 bg-gray-900 rounded-xl border border-gray-700">
                         <div className="flex justify-between items-center mb-4">
                             <span className="text-gray-400">Current Volume</span>
-                            <span className="font-mono text-xl">{market.volume}</span>
+                            <span className="font-mono text-xl">${market.volume ? market.volume.toLocaleString() : '0'}</span>
                         </div>
                         <div className="flex justify-between items-center mb-4">
                             <span className="text-gray-400">End Date</span>
                             <span>{market.endDate || "N/A"}</span>
                         </div>
                         
-                         <div className="grid grid-cols-2 gap-3 mt-8">
+                        <div className="grid grid-cols-2 gap-3 mt-8">
                             <button 
                                 onClick={() => setIsModalOpen(true)}
                                 className="flex flex-col items-center justify-center p-4 rounded-lg bg-green-900/20 border border-green-900 hover:bg-green-900/40 text-green-400 transition-colors"
                             >
                                 <span className="font-bold text-lg">YES</span>
-                                <span className="text-sm">{market.yesPrice}</span>
+                                <span className="text-sm">{(market.yesPrice * 100).toFixed(1)}%</span>
                             </button>
                             <button 
                                 onClick={() => setIsModalOpen(true)}
                                 className="flex flex-col items-center justify-center p-4 rounded-lg bg-red-900/20 border border-red-900 hover:bg-red-900/40 text-red-400 transition-colors"
                             >
                                 <span className="font-bold text-lg">NO</span>
-                                <span className="text-sm">{market.noPrice}</span>
+                                <span className="text-sm">{(market.noPrice * 100).toFixed(1)}%</span>
                             </button>
                         </div>
                         
                         {!connected && (
-                            <div className="mt-4 flex justify-center">
-                                <WalletMultiButton className="!bg-purple-600 scale-90" />
+                            <div className="mt-6 flex justify-center">
+                                <button 
+                                    onClick={connect}
+                                    className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-full transition-all text-sm"
+                                >
+                                    <Wallet className="w-4 h-4" />
+                                    Connect to Trade
+                                </button>
                             </div>
                         )}
                     </div>

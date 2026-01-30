@@ -1,4 +1,6 @@
 import { pnpAdapter } from "@/lib/adapter/pnp.adapter";
+import { marketService } from "./market.service";
+import { TradeEvent } from "@/types";
 
 export interface TradeRequest {
     marketId: number;
@@ -6,13 +8,19 @@ export interface TradeRequest {
     amount: number;
     userAddress: string;
     isPrivate: boolean;
+    txHash?: string;
 }
 
 export interface TradeResult {
     success: boolean;
     txHash?: string;
     message: string;
+    newPriceYes?: number;
+    newPriceNo?: number;
 }
+
+// Mock Event Log
+const EVENT_LOG: TradeEvent[] = [];
 
 export class TradeService {
     async executeTrade(trade: TradeRequest): Promise<TradeResult> {
@@ -21,27 +29,63 @@ export class TradeService {
             return { success: false, message: "Invalid wallet address" };
         }
 
-        // 2. Logic for Privacy Track
-        if (trade.isPrivate) {
-            console.log(`[PRIVACY MODE] Executing shielded trade for ${trade.userAddress}`);
-            // In a real implementation, this would interact with a privacy protocol (e.g., Elusiv, Light Protocol)
-            // or use an obscure/mixnet pattern.
-            // For MVP: We assume success and return a mocked confidential hash
-            return {
-                success: true,
-                txHash: "confidential_tx_" + Math.random().toString(36).substring(7),
-                message: "Trade executed via Private Shield",
-            };
+        // 2. Validate Market
+        const market = await marketService.getMarketById(trade.marketId);
+        if (!market) {
+            return { success: false, message: "Market not found" };
+        }
+        if (market.resolved) {
+            return { success: false, message: "Market is already resolved" };
         }
 
-        // 3. Regular Trade
-        console.log(`[PUBLIC MODE] Executing standard trade for ${trade.userAddress}`);
-        // Simulate blockchain confirmation
+        // 3. AMM Execution (Update Liquidity)
+        // In simulation: User 'sends' SOL to the pool.
+        // We update the pool liquidity immediately.
+        const updatedMarket = await marketService.updateLiquidity(trade.marketId, trade.side, trade.amount);
+
+        // 4. Mint Outcome Tokens (Track Position)
+        // Strategy: 1 SOL bet = 1 SHARE of that outcome.
+        const shares = trade.amount;
+        await marketService.updateUserPosition(trade.userAddress, trade.marketId, trade.side, shares);
+
+        // 5. Generate Trade Event
+        const event: TradeEvent = {
+            id: Math.random().toString(36).substring(7),
+            marketId: trade.marketId,
+            trader: trade.userAddress,
+            outcome: trade.side,
+            amount: trade.amount,
+            price: trade.side === "YES" ? updatedMarket.yesPrice : updatedMarket.noPrice,
+            timestamp: Date.now(),
+        };
+        EVENT_LOG.push(event);
+
+        // 6. Return Result
+        console.log(`[TRADE] Wallet ${trade.userAddress} bought ${trade.amount} ${trade.side} on Market ${trade.marketId}`);
+
+        // Handle Privacy Track or Real Transaction
+        let finalTxHash = trade.txHash;
+
+        if (!finalTxHash) {
+            // Fallback for simulation/privacy if no hash provided
+            finalTxHash = "solana_tx_" + Math.random().toString(36).substring(7);
+            if (trade.isPrivate) {
+                console.log(`[PRIVACY] Shielded transaction log for ${trade.userAddress}`);
+                finalTxHash = "confidential_tx_" + Math.random().toString(36).substring(7);
+            }
+        }
+
         return {
             success: true,
-            txHash: "solana_tx_" + Math.random().toString(36).substring(7),
-            message: "Trade confirmed on public ledger",
+            txHash: finalTxHash,
+            message: `Successfully bought ${trade.amount} ${trade.side} shares`,
+            newPriceYes: updatedMarket.yesPrice,
+            newPriceNo: updatedMarket.noPrice,
         };
+    }
+
+    async getTradeHistory(marketId: number): Promise<TradeEvent[]> {
+        return EVENT_LOG.filter(e => e.marketId === marketId).sort((a, b) => b.timestamp - a.timestamp);
     }
 }
 

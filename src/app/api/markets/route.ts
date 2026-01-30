@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { marketService } from "@/services/market.service";
 
+// Force dynamic selection to avoid Next.js caching this route as static
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
     const markets = await marketService.getAllMarkets();
     return NextResponse.json(markets);

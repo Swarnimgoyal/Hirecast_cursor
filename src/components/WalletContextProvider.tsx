@@ -1,44 +1,92 @@
 "use client";
 
-import { FC, ReactNode, useMemo } from "react";
 import {
-  ConnectionProvider,
-  WalletProvider,
-} from "@solana/wallet-adapter-react";
-import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-  import { PhantomWalletAdapter, SolflareWalletAdapter } from "@solana/wallet-adapter-wallets";
-import {
-  WalletModalProvider,
-  WalletMultiButton,
-} from "@solana/wallet-adapter-react-ui";
-import { clusterApiUrl } from "@solana/web3.js";
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+  ReactNode,
+} from "react";
+import { PublicKey } from "@solana/web3.js";
 
-// Default styles that can be overridden by your app
-import "@solana/wallet-adapter-react-ui/styles.css";
+interface WalletContextState {
+  walletAddress: string | null;
+  publicKey: PublicKey | null;
+  connected: boolean;
+  connect: () => Promise<void>;
+  disconnect: () => Promise<void>;
+}
 
-export const WalletContextProvider: FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'.
-  const network = WalletAdapterNetwork.Devnet;
+const WalletContext = createContext<WalletContextState>({} as WalletContextState);
 
-  // You can also provide a custom RPC endpoint.
-  const endpoint = useMemo(() => clusterApiUrl(network), [network]);
+export const useWallet = () => useContext(WalletContext);
 
-  const wallets = useMemo(
-    () => [
-      new PhantomWalletAdapter(),
-      new SolflareWalletAdapter(),
-    ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [network]
-  );
+export const WalletContextProvider = ({ children }: { children: ReactNode }) => {
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+
+  const publicKey = useMemo(() => {
+    return walletAddress ? new PublicKey(walletAddress) : null;
+  }, [walletAddress]);
+
+  const checkIfWalletIsConnected = async () => {
+    try {
+      const { solana } = window;
+      if (solana && solana.isPhantom) {
+        // Only connect if trusted (previously connected) to avoid popup spam
+        const response = await solana.connect({ onlyIfTrusted: true });
+        console.log("Auto-connected:", response.publicKey.toString());
+        setWalletAddress(response.publicKey.toString());
+      }
+    } catch (error) {
+      // User hasn't connected yet, that's fine
+    }
+  };
+
+  const connect = async () => {
+    const { solana } = window;
+    if (solana && solana.isPhantom) {
+      try {
+        const response = await solana.connect();
+        console.log("Connected:", response.publicKey.toString());
+        setWalletAddress(response.publicKey.toString());
+      } catch (err) {
+        console.error("User rejected connection", err);
+      }
+    } else {
+      alert("Phantom Wallet not found! Please install it.");
+      window.open("https://phantom.app/", "_blank");
+    }
+  };
+
+  const disconnect = async () => {
+    const { solana } = window;
+    if (solana) {
+      await solana.disconnect();
+      setWalletAddress(null);
+    }
+  };
+
+  useEffect(() => {
+    // Wait for window load to ensure extension is injected
+    const onLoad = async () => {
+      await checkIfWalletIsConnected();
+    };
+    window.addEventListener("load", onLoad);
+    return () => window.removeEventListener("load", onLoad);
+  }, []);
 
   return (
-    <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>{children}</WalletModalProvider>
-      </WalletProvider>
-    </ConnectionProvider>
+    <WalletContext.Provider
+      value={{
+        walletAddress,
+        publicKey,
+        connected: !!walletAddress,
+        connect,
+        disconnect,
+      }}
+    >
+      {children}
+    </WalletContext.Provider>
   );
 };
