@@ -223,8 +223,9 @@ export default function ArenaPage() {
                     market={{
                         id: quest.marketId,
                         question: quest.title,
-                        price: 0.5, // Mock price for now
-                        liquidity: 1000
+                         yesPrice: 0.5,
+                         noPrice: 0.5,
+                         volume: 1000
                     }} 
                     onClose={() => setShowTradeModal(false)}
                 />
