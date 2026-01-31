@@ -220,13 +220,14 @@ export default function ArenaPage() {
             {/* Reusing existing TradeModal for the financial leg */}
             {showTradeModal && quest && (
                 <TradeModal 
-                    market={{
-                        id: quest.marketId,
-                        question: quest.title,
-                         yesPrice: 0.5,
-                         noPrice: 0.5,
-                         volume: 1000
-                    }} 
+                     isOpen={showTradeModal}
+                      market={{
+                      id: quest.marketId,
+                      question: quest.title,
+                        yesPrice: 0.5,
+                        noPrice: 0.5,
+                        volume: 1000
+                          }}
                     onClose={() => setShowTradeModal(false)}
                 />
             )}
