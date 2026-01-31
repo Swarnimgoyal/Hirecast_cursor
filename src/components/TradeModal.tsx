@@ -1,6 +1,6 @@
 "use client";
 
-import { useWallet } from "@/components/WalletContextProvider";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useState } from "react";
 import { Shield, Lock, Eye, EyeOff, CheckCircle, Loader2, Wallet, ExternalLink } from "lucide-react";
 import { twMerge } from "tailwind-merge";
@@ -38,7 +38,8 @@ interface TradeModalProps {
 }
 
 export const TradeModal = ({ market, isOpen, onClose }: TradeModalProps) => {
-  const { connected, publicKey, connect } = useWallet();
+  const { connection } = useConnection();
+  const { connected, publicKey, connect, sendTransaction } = useWallet();
   const [amount, setAmount] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -57,7 +58,7 @@ export const TradeModal = ({ market, isOpen, onClose }: TradeModalProps) => {
     try {
         let signature = "";
         
-        // --- REAL TRANSACTION FLOW ---
+         // --- REAL TRANSACTION FLOW ---
         if (!isPrivate) {
              // 1. Request USDC Transaction Build from Backend
              const buildRes = await fetch("/api/solana", {
@@ -76,28 +77,13 @@ export const TradeModal = ({ market, isOpen, onClose }: TradeModalProps) => {
              // 2. Deserialize Transaction
              const transaction = Transaction.from(Buffer.from(tx, 'base64'));
 
-             // @ts-ignore
-             const { solana } = window;
+             // 3. Send Transaction via Adapter
+             // This prompts the connected wallet (Phantom/Solflare) to sign and broadcast
+             signature = await sendTransaction(transaction, connection);
              
-             if (solana && solana.isPhantom) {
-                 // 3. Sign Client-Side
-                 const signedTransaction = await solana.signTransaction(transaction);
-                 
-                 // 4. Serialize & Send via Backend Proxy
-                 const serialized = signedTransaction.serialize().toString('base64');
-                 
-                 const sendRes = await fetch("/api/solana", {
-                     method: "POST",
-                     body: JSON.stringify({ action: "sendTransaction", tx: serialized })
-                 });
-                 
-                 const { signature: sig, error: sendError } = await sendRes.json();
-                 if (sendError) throw new Error("Failed to send transaction: " + sendError);
-                 
-                 signature = sig;
-             } else {
-                 throw new Error("Phantom wallet not found");
-             }
+             // 4. Confirm Transaction
+             const confirmation = await connection.confirmTransaction(signature, 'confirmed');
+             if (confirmation.value.err) throw new Error("Transaction failed on Solana");
         } else {
             // Simulated privacy hash
             signature = "confidential_" + Math.random().toString(36).substring(7);

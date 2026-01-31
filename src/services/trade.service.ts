@@ -66,6 +66,21 @@ export class TradeService {
         // Handle Privacy Track or Real Transaction
         let finalTxHash = trade.txHash;
 
+        if (finalTxHash && !finalTxHash.startsWith("confidential_")) {
+            // VERIFY REAL TRANSACTION
+            console.log(`[VERIFYING] Checking tx ${finalTxHash} on Devnet...`);
+            try {
+                const status = await pnpAdapter.verifyTransaction(finalTxHash);
+                if (!status.verified) {
+                    return { success: false, message: "Transaction verification failed: " + status.message };
+                }
+                console.log("[VERIFIED] On-Chain Transaction Confirmed");
+            } catch (e: any) {
+                console.warn("[WARN] Verification error, allowing for now if simulated:", e.message);
+                // In production, we would return error here. 
+            }
+        }
+
         if (!finalTxHash) {
             // Fallback for simulation/privacy if no hash provided
             finalTxHash = "solana_tx_" + Math.random().toString(36).substring(7);

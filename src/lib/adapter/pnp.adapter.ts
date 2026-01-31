@@ -48,6 +48,25 @@ export class Web3Adapter {
             return false;
         }
     }
+    async verifyTransaction(signature: string): Promise<{ verified: boolean; message: string }> {
+        try {
+            const status = await this.connection.getSignatureStatus(signature);
+            if (!status || !status.value) {
+                return { verified: false, message: "Transaction not found on Devnet" };
+            }
+            if (status.value.err) {
+                return { verified: false, message: "Transaction failed on-chain" };
+            }
+            // Optional: Check confirmations
+            if (status.value.confirmationStatus === "processed") {
+                // Good enough for soft confirmation
+                return { verified: true, message: "Transaction processed" };
+            }
+            return { verified: true, message: "Transaction confirmed" };
+        } catch (e: any) {
+            return { verified: false, message: e.message };
+        }
+    }
 }
 
 export const pnpAdapter = new Web3Adapter();
