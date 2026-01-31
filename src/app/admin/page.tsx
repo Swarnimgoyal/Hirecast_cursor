@@ -4,6 +4,7 @@ import { useWallet } from "@/components/WalletContextProvider";
 import { useEffect, useState } from "react";
 import { adminService, SystemHealth, LiveEvent, MarketInsight } from "@/services/admin.service";
 import { Activity, ShieldAlert, Cpu, Radio, Network, AlertTriangle, CheckCircle, Database, Play, Zap, X } from "lucide-react";
+import { CreateMarketSection } from "@/components/CreateMarketSection";
 
 export default function AdminPage() {
     const { connected } = useWallet();
@@ -124,6 +125,9 @@ export default function AdminPage() {
                             </div>
                         </div>
                     </div>
+
+                   {/* 1.5 Create Market Section */}
+                   <CreateMarketSection />
 
                     {/* 2. AI Market Intelligence */}
                     <div>

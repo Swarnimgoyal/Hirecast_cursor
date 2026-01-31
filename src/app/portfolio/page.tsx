@@ -1,6 +1,6 @@
 "use client";
 
-import { useWallet } from "@/components/WalletContextProvider";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { Navbar } from "@/components/Navbar";
 import Link from "next/link";
 import { ArrowLeft, Wallet, TrendingUp, TrendingDown } from "lucide-react";
@@ -17,7 +17,8 @@ interface Position {
 }
 
 export default function PortfolioPage() {
-    const { connected, walletAddress } = useWallet();
+    const { connected, publicKey } = useWallet();
+    const walletAddress = publicKey?.toString();
     const [positions, setPositions] = useState<Position[]>([]);
     const [loading, setLoading] = useState(false);
 

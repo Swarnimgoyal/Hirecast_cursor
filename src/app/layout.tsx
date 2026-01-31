@@ -7,8 +7,8 @@ import { Navbar } from "@/components/Navbar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "HireCast | Solana Prediction Market",
-  description: "Trade on outcomes with HireCast",
+  title: "NEXUS | The Future of Prediction",
+  description: "Trade on truth with NEXUS - The decentralized prediction protocol",
 };
 
 export default function RootLayout({

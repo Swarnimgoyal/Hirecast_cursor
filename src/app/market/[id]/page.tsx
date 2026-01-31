@@ -68,17 +68,17 @@ export default function MarketPage() {
                         <div className="grid grid-cols-2 gap-3 mt-8">
                             <button 
                                 onClick={() => setIsModalOpen(true)}
-                                className="flex flex-col items-center justify-center p-4 rounded-lg bg-green-900/20 border border-green-900 hover:bg-green-900/40 text-green-400 transition-colors"
+                                className="group/btn relative flex flex-col items-center justify-center rounded-lg border border-green-900/30 bg-green-950/10 py-4 transition-all hover:border-green-500/50 hover:bg-green-950/30 active:scale-95"
                             >
-                                <span className="font-bold text-lg">YES</span>
-                                <span className="text-sm">{(market.yesPrice * 100).toFixed(1)}%</span>
+                                <span className="text-xs font-medium text-green-700 uppercase tracking-wider group-hover/btn:text-green-400">Vote YES</span>
+                                <span className="text-2xl font-bold text-green-500">{(market.yesPrice * 100).toFixed(1)}%</span>
                             </button>
                             <button 
                                 onClick={() => setIsModalOpen(true)}
-                                className="flex flex-col items-center justify-center p-4 rounded-lg bg-red-900/20 border border-red-900 hover:bg-red-900/40 text-red-400 transition-colors"
+                                className="group/btn relative flex flex-col items-center justify-center rounded-lg border border-red-900/30 bg-red-950/10 py-4 transition-all hover:border-red-500/50 hover:bg-red-950/30 active:scale-95"
                             >
-                                <span className="font-bold text-lg">NO</span>
-                                <span className="text-sm">{(market.noPrice * 100).toFixed(1)}%</span>
+                                <span className="text-xs font-medium text-red-700 uppercase tracking-wider group-hover/btn:text-red-400">Vote NO</span>
+                                <span className="text-2xl font-bold text-red-500">{(market.noPrice * 100).toFixed(1)}%</span>
                             </button>
                         </div>
                         
