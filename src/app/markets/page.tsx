@@ -1,6 +1,7 @@
 "use client";
 
-import { useWallet } from "@/components/WalletContextProvider";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useState, useEffect } from "react";
 import { TradeModal } from "@/components/TradeModal";
 import { MarketCard } from "@/components/MarketCard";
@@ -16,7 +17,8 @@ interface Market {
 }
 
 export default function MarketsPage() {
-  const { connected, connect } = useWallet();
+  const { connected } = useWallet();
+  const { setVisible } = useWalletModal();
   const [selectedMarket, setSelectedMarket] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [markets, setMarkets] = useState<Market[]>([]);
@@ -63,7 +65,7 @@ export default function MarketsPage() {
             {!connected && (
             <div className="flex justify-center">
                 <button 
-                    onClick={connect}
+                    onClick={() => setVisible(true)}
                     className="group flex items-center gap-3 bg-white text-black hover:bg-gray-100 font-bold py-4 px-8 rounded-full transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] transform hover:-translate-y-1"
                 >
                     <Wallet className="w-5 h-5 transition-transform group-hover:rotate-12" />

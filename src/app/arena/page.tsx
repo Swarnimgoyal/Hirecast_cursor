@@ -1,14 +1,15 @@
 "use client";
 
 import { Navbar } from "@/components/Navbar";
-import { useWallet } from "@/components/WalletContextProvider";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { arenaService, ArenaProfile, ArenaQuest } from "@/services/arena.service";
 import { useEffect, useState } from "react";
 import { Brain, Zap, Users, Shield, Target, Lock } from "lucide-react";
 import { TradeModal } from "@/components/TradeModal";
 
 export default function ArenaPage() {
-    const { connected, walletAddress } = useWallet();
+    const { connected, publicKey } = useWallet();
+    const walletAddress = publicKey?.toString() || null;
     const [profile, setProfile] = useState<ArenaProfile | null>(null);
     const [quest, setQuest] = useState<ArenaQuest | null>(null);
     
@@ -223,10 +224,12 @@ export default function ArenaPage() {
                     market={{
                         id: quest.marketId,
                         question: quest.title,
-                        price: 0.5, // Mock price for now
-                        liquidity: 1000
+                        yesPrice: 0.5,
+                        noPrice: 0.5,
+                        volume: 1000
                     }} 
                     onClose={() => setShowTradeModal(false)}
+                    isOpen={showTradeModal}
                 />
             )}
         </div>

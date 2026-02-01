@@ -1,6 +1,7 @@
 "use client";
 
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useState } from "react";
 import { Shield, Lock, Eye, EyeOff, CheckCircle, Loader2, Wallet, ExternalLink } from "lucide-react";
 import { twMerge } from "tailwind-merge";
@@ -40,6 +41,7 @@ interface TradeModalProps {
 export const TradeModal = ({ market, isOpen, onClose }: TradeModalProps) => {
   const { connection } = useConnection();
   const { connected, publicKey, connect, sendTransaction } = useWallet();
+  const { setVisible } = useWalletModal();
   const [amount, setAmount] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -142,7 +144,7 @@ export const TradeModal = ({ market, isOpen, onClose }: TradeModalProps) => {
                 <p className="text-gray-400 mb-6">You must connect your Solana wallet to place a trade.</p>
                 <div className="flex justify-center">
                     <button 
-                        onClick={connect}
+                        onClick={() => setVisible(true)}
                         className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-full transition-all"
                     >
                         <Wallet className="w-5 h-5" />
