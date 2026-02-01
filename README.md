@@ -18,8 +18,7 @@ Trade on event outcomes by buying **Yes / No** shares.
 - **Portfolio tracking**: Live PnL and position visibility.
 
 ---
-## Deployed Link 
-https://nexus-atkp.vercel.app/
+
 ### 2. The Arena (Experimental)
 A two-layer prediction challenge designed to test both intuition and conviction.
 
@@ -119,6 +118,10 @@ This keeps UI components focused purely on **user experience**, not blockchain i
 ### Prerequisites
 - Node.js 18+
 - Phantom or Solflare wallet set to **Devnet**
+- 
+- ## Deployed Link 
+https://nexus-atkp.vercel.app/
+
 
 ### Installation
 
@@ -158,4 +161,3 @@ No mainnet deployment
 All markets are simulated
 
 Always use a Solana Devnet wallet when interacting with this application.
-
