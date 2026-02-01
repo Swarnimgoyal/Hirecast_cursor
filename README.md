@@ -18,7 +18,8 @@ Trade on event outcomes by buying **Yes / No** shares.
 - **Portfolio tracking**: Live PnL and position visibility.
 
 ---
-
+## Deployed Link 
+https://nexus-atkp.vercel.app/
 ### 2. The Arena (Experimental)
 A two-layer prediction challenge designed to test both intuition and conviction.
 
@@ -157,3 +158,4 @@ No mainnet deployment
 All markets are simulated
 
 Always use a Solana Devnet wallet when interacting with this application.
+
