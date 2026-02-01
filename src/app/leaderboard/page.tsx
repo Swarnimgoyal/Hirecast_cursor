@@ -19,6 +19,7 @@ export default function LeaderboardPage() {
                  // If the connected user isn't in the top list (which are usually mocked/seeded or limited), 
                  // we might simply display what the API returns. 
                  // For now, the API returns everyone in the DB.
+                 //Done
                  setLeaders(data);
              } catch (e) {
                  console.error("Failed to load leaderboard", e);
