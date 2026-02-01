@@ -48,14 +48,6 @@ NEXUS follows a **User → Wallet → Application → Blockchain → Verificatio
 
 ---
 
-## 🔁 Transaction Flow (Buy “Yes” Example)
-
-<p align="center">
-  <img src="assets/transaction-flow.jpeg" width="900" />
-  <br />
-  <em>End-to-end transaction lifecycle from user action to market state update</em>
-</p>
-
 ### Step-by-Step Flow
 
 1. **User Action**  
@@ -161,3 +153,4 @@ No mainnet deployment
 All markets are simulated
 
 Always use a Solana Devnet wallet when interacting with this application.
+
